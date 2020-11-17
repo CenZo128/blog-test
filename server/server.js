@@ -1,20 +1,17 @@
 const Koa = require('koa')
-const Router = require('koa-router')
 const app = new Koa()
-const router = Router()
 const PORT = 3000
 
-// app.use(ctx => {
-//     ctx.body = 'Hello Koa'
-// })
-router.get('/', (ctx,next) => {
-    ctx.body = 'Sudah jalan dengan dia ea'
-})
+const routes = require('./routes')
 
 app
-    .use(router.routes())
-    .use(router.allowedMethods())
+    .use(routes.routes())
+    .use(routes.allowedMethods())
 
-app.listen(PORT, ()=>{
+const db = require('./config/config')
+db.on("error", console.error.bind(console, "Connection Error"));
+db.once("open", () => console.log("Connected to mongodb!"));
+
+app.listen(PORT, () => {
     console.log("App is running at : ", PORT)
 })
