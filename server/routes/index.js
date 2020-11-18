@@ -10,6 +10,6 @@ router.get('/', async (ctx,next) => {
 })
 
 router.use('/users', userRoutes.routes())
-router.use('/articls', userRoutes.routes())
+router.use('/articles', articleRoutes.routes())
 
 module.exports = router
