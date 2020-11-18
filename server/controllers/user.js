@@ -1,8 +1,7 @@
 const { User } = require("../model/user");
 const {decryptPwd} = require('../helpers/bcrypt')
 const {tokenGenerator} = require('../helpers/jwt')
-// import mongoose from 'mongoose';
-// let User = mongoose.model('User');
+
 
 exports.list = async (ctx,next) => {
 	try {
@@ -29,17 +28,15 @@ exports.Register = async (ctx, next) => {
 
 	try {
 	  const { email, password } = ctx.request.body;
-  
 	  let user = await User.findOne({ email: email });
-  
+
 	  if (!user)
 		return next({
 		  message: `User  email  not registered `,
 		});
 		
 	  if (decryptPwd(password, user.password)) {
-		const token = tokenGenerator(user);
-		
+		const token = tokenGenerator(user);		
 		ctx.status = 200;
 		ctx.body = {token}
 	  }
@@ -56,30 +53,7 @@ exports.Register = async (ctx, next) => {
 		}
 	}
   };
-  
-  exports.GetUser = async (req, res, next) => {
-	try {
-	  let user = await User.find()
-	  res.status(200).json({
-		success: true,
-		message: "Successfully retrieve the data!",
-		data: user,
-	  });
-	} catch (err) {
-	  next(err);
-	}
-  };
-  exports.GetUserId = async (req, res, next) => {
-	try {
-	const  id  = req.userData._id;
-	  let user = await User.findOne({_id: id})
-	  res.status(200).json({
-		data: user,
-	  });
-	} catch (err) {
-	  next(err);
-	}
-  };
+
   exports.Edit = async (ctx, next) => {
 	try {
 	  const { full_name,email,profile_image } = ctx.request.body;
@@ -107,14 +81,12 @@ exports.Register = async (ctx, next) => {
   exports.Delete = async (ctx, next) => {
 	try {
 	  const { id } = ctx.request.params;
-  
+
 	  if (!id) return next({ message: "Missing ID Params" });
-  
 	  await User.findByIdAndRemove(id, (error, doc, result) => {
 		if (error) throw "Failed to delete";
 		if (!doc)
 		  return ctx.status = 400;
-		
 		  ctx.status = 200;
 		  ctx.body = doc;
 	  });
