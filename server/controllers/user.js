@@ -1,31 +1,19 @@
-const { User } = require("../models/user");
-const {decryptPwd} = require('../helpers/bcrypt')
-const {tokenGenerator} = require('../helpers/jwt')
+const { User } = require("../model/user");
+// const {decryptPwd} = require('../helpers/bcrypt')
+// const {tokenGenerator} = require('../helpers/jwt')
+// import mongoose from 'mongoose';
+// let User = mongoose.model('User');
 
-
-exports.Register = async (req, res, next) => {
-	const {email,full_name,password} = req.body
-	try {	
-	const found = await User.findOne({email})
-	if (found){
-		res.status (400).json({message : "email has been registered"})
-	}
-	else {
-	  const data = await User.create({
-		  full_name,
-		  email, 
-		  password
-	  });
-	  res.status(201).json({
-		success: true,
-		message: "Successfully create a user!",
-		data,
-	  });}
-	} catch (err) {
-	  next(err);
-	}
-  };
-  
+exports.Register = async (ctx, next) => {
+    try {
+        let new_student = User(ctx.request.body);
+        await new_student.save();
+        ctx.body = new_student;   
+    } catch (err) {
+        ctx.status = err.status || 500;
+        ctx.body = err.message;
+    }
+};
   exports.Login = async (req, res, next) => {
 
 	try {
