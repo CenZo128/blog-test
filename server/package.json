@@ -19,6 +19,8 @@
     "koa": "^2.13.0",
     "koa-router": "^10.0.0",
     "mongoose": "^5.10.15",
+    "mongoose-unique-validator": "^2.0.3",
+    "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^2.0.6"
   }
 }
