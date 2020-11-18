@@ -2,21 +2,9 @@ const { User } = require("../model/user");
 const {decryptPwd} = require('../helpers/bcrypt')
 const {tokenGenerator} = require('../helpers/jwt')
 
-
-exports.list = async (ctx,next) => {
-	try {
-		let user = await User.find();
-		ctx.status =200;
-		ctx.body= user;
-	}catch (err){
-		ctx.status = 500;
-
-	}
-}
 exports.Register = async (ctx, next) => {
     try {
-		let new_student = new User(ctx.request.body);
-		console.log(ctx.request.body);
+        let new_student = User(ctx.request.body);
         await new_student.save();
         ctx.body = new_student;   
     } catch (err) {
@@ -24,7 +12,7 @@ exports.Register = async (ctx, next) => {
         ctx.body = err.message;
     }
 };
-  exports.Login = async (ctx, next) => {
+  exports.Login = async (req, res, next) => {
 
 	try {
 	  const { email, password } = ctx.request.body;
@@ -41,47 +29,49 @@ exports.Register = async (ctx, next) => {
 		ctx.body = {token}
 	  }
 	  else {
-		  ctx.status = 500;
-		  ctx.body = {
-			  message: "error"
-		  }
+		  res.status(500).json({
+			  success: false,
+			  message: "Cannot find Users password"
+		  })
 	  }
 	} catch (err) {
-		ctx.status = 500;
-		ctx.body = {
-			message: err.message
-		}
+	  res.status(500).json({
+		  success: false,
+		  message: "Cannot find User or Password"
+	  })
 	}
   };
 
   exports.Edit = async (ctx, next) => {
 	try {
-	  const { full_name,email,profile_image } = ctx.request.body;
-	  const { id } = ctx.request.params;
+	  const { full_name,email,description,profile_image } = req.body;
+	  const { id } = req.params;
 	  let obj = {};
-		console.log(ctx.request.body);
-		console.log(ctx.request.params);
+
 		 //checking data input
 		 if(full_name) obj.full_name = full_name;
 		 if(email) obj.email = email;
-		 if(req.file && req.file.fieldname && req.file.path) obj.profile_image = req.file.path;
+		 if(description) obj.description = description;
+		 if(req.file && req.file.fieldname && req.file.path) obj.product_image = req.file.path;
 
 		 const updateUser = await User.findByIdAndUpdate(
             id,
             { $set: obj },
             { new: true }
-		);
-		ctx.status = 200;
-		ctx.body = {updateUser}
+        );
+		res.status(200).json({
+            success: true,
+            msg: "User updated!",
+            updateUser
+        });
 	} catch (err) {
-		ctx.status = 500;
+	  next(err);
 	}
   };
   
-  exports.Delete = async (ctx, next) => {
+  exports.Delete = async (req, res, next) => {
 	try {
 	  const { id } = ctx.request.params;
-
 	  if (!id) return next({ message: "Missing ID Params" });
 	  await User.findByIdAndRemove(id, (error, doc, result) => {
 		if (error) throw "Failed to delete";
@@ -91,7 +81,7 @@ exports.Register = async (ctx, next) => {
 		  ctx.body = doc;
 	  });
 	} catch (err) {
-	  ctx.status = 400;
+	  next(err);
 	}
   };
   
