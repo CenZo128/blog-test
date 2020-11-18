@@ -5,10 +5,10 @@ const bodyParser = require('koa-bodyparser');
 
 const routes = require('./routes')
 
+app.use(bodyParser());
 app
     .use(routes.routes())
     .use(routes.allowedMethods())
-app.use(bodyParser());
 
 const db = require('./config/config')
 db.on("error", console.error.bind(console, "Connection Error"));
