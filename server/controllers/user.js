@@ -1,8 +1,6 @@
 const { User } = require("../model/user");
-// const {decryptPwd} = require('../helpers/bcrypt')
-// const {tokenGenerator} = require('../helpers/jwt')
-// import mongoose from 'mongoose';
-// let User = mongoose.model('User');
+const {decryptPwd} = require('../helpers/bcrypt')
+const {tokenGenerator} = require('../helpers/jwt')
 
 exports.Register = async (ctx, next) => {
     try {
@@ -17,23 +15,18 @@ exports.Register = async (ctx, next) => {
   exports.Login = async (req, res, next) => {
 
 	try {
-	  const { email, password } = req.body;
-  
+	  const { email, password } = ctx.request.body;
 	  let user = await User.findOne({ email: email });
-  
+
 	  if (!user)
 		return next({
 		  message: `User  email  not registered `,
 		});
 		
 	  if (decryptPwd(password, user.password)) {
-		const token = tokenGenerator(user);
-		
-		res.status(200).json({
-		  success: true,
-		  message: "Successfully logged in!",
-		  token: token,
-		});
+		const token = tokenGenerator(user);		
+		ctx.status = 200;
+		ctx.body = {token}
 	  }
 	  else {
 		  res.status(500).json({
@@ -48,31 +41,8 @@ exports.Register = async (ctx, next) => {
 	  })
 	}
   };
-  
-  exports.GetUser = async (req, res, next) => {
-	try {
-	  let user = await User.find()
-	  res.status(200).json({
-		success: true,
-		message: "Successfully retrieve the data!",
-		data: user,
-	  });
-	} catch (err) {
-	  next(err);
-	}
-  };
-  exports.GetUserId = async (req, res, next) => {
-	try {
-	const  id  = req.userData._id;
-	  let user = await User.findOne({_id: id})
-	  res.status(200).json({
-		data: user,
-	  });
-	} catch (err) {
-	  next(err);
-	}
-  };
-  exports.Edit = async (req, res, next) => {
+
+  exports.Edit = async (ctx, next) => {
 	try {
 	  const { full_name,email,description,profile_image } = req.body;
 	  const { id } = req.params;
@@ -101,20 +71,14 @@ exports.Register = async (ctx, next) => {
   
   exports.Delete = async (req, res, next) => {
 	try {
-	  const { id } = req.params;
-  
+	  const { id } = ctx.request.params;
 	  if (!id) return next({ message: "Missing ID Params" });
-  
 	  await User.findByIdAndRemove(id, (error, doc, result) => {
 		if (error) throw "Failed to delete";
 		if (!doc)
-		  return res.status(400).json({ success: false, err: "Data not found!" });
-  
-		res.status(200).json({
-		  success: true,
-		  message: "Successfully delete data!",
-		  data: doc,
-		});
+		  return ctx.status = 400;
+		  ctx.status = 200;
+		  ctx.body = doc;
 	  });
 	} catch (err) {
 	  next(err);
